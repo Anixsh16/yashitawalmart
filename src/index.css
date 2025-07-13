@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+:root {
+  --walmart-blue: #0071DC;
+  --walmart-dark-blue: #004F9A;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Improved button tap states for mobile */
+@media (max-width: 768px) {
+  button, 
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--walmart-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--walmart-dark-blue);
+}
+
+/* Smooth image loading */
+img {
+  transition: opacity 0.3s ease;
+}
+
+img.loading {
+  opacity: 0;
+}
+
+/* Focus styles */
+:focus {
+  outline: 2px solid var(--walmart-blue);
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer utilities {
+  .shadow-text {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .bg-gradient-4th {
+    background: linear-gradient(135deg, #dc2626 0%, white 50%, #2563eb 100%);
+  }
+}
+
+/* Hero Slider Animations */
+.slide-enter {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.slide-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
+}
+
+.slide-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.slide-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 500ms ease-in-out, transform 500ms ease-in-out;
+}
+
+/* Category Card Hover Effects */
+.category-card:hover .category-icon {
+  transform: scale(1.2);
+  transition: transform 0.3s ease;
+}
+
+/* Loading Animation */
+.page-loading {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.page-loaded {
+  opacity: 1;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+}
+
+* {
+  box-sizing: border-box;
+}
