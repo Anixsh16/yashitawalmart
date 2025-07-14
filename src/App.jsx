@@ -432,7 +432,7 @@ const App = () => {
       try {
         const imageUrls = [
           ...slides.map(slide => slide.image),
-          WalmartLogo,
+          "https://tse1.mm.bing.net/th/id/OIP.IJzb_xYqjRLGenO8MOQAsQHaEE?pid=Api&P=0&h=180",
           // Add any other images that need preloading
         ];
         
