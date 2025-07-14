@@ -587,7 +587,6 @@ const App = () => {
                 onClick={() => setIsCartOpen(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => window.location.href = '/cart'}
                 aria-label="View shopping cart"
               >
                 <ShoppingCartIcon className="h-6 w-6 mr-2" />
@@ -981,6 +980,28 @@ const App = () => {
                       </div>
                       <motion.button
                         whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setCartCount(prev => prev + 1);
+                          setCartItems(prev => {
+                            const existingItem = prev.find(item => item.name === offer.title);
+                            if (existingItem) {
+                              return prev.map(item =>
+                                item.name === offer.title
+                                  ? { ...item, quantity: item.quantity + 1 }
+                                  : item
+                              );
+                            } else {
+                              return [...prev, {
+                                id: Date.now(),
+                                name: offer.title,
+                                price: offer.salePrice,
+                                quantity: 1
+                              }];
+                            }
+                          });
+                          setCartMessage(`✅ Added "${offer.title}" to cart!`);
+                          setTimeout(() => setCartMessage(''), 3000);
+                        }}
                         className="w-full bg-[#0071DC] hover:bg-[#004F9A] text-white font-semibold py-2 px-4 rounded-full transition-colors duration-200"
                       >
                         Add to Cart
