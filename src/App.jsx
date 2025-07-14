@@ -564,6 +564,8 @@ const App = () => {
                 className="nav-button text-white hover:bg-[#0062BD] px-6 py-2.5 rounded-full flex items-center transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => window.location.href = '/cart'}
+                aria-label="View shopping cart"
               >
                 <ShoppingCartIcon className="h-6 w-6 mr-2" />
                 <span className="hidden md:inline font-medium">Cart</span>
