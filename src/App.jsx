@@ -212,6 +212,11 @@ const ScrollToTopButton = () => {
 const App = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [cartCount, setCartCount] = useState(3);
+  const [cartItems, setCartItems] = useState([
+    { id: 1, name: "Sample Item 1", price: "$19.99", quantity: 1 },
+    { id: 2, name: "Sample Item 2", price: "$24.99", quantity: 2 }
+  ]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -257,6 +262,23 @@ const App = () => {
       
       if (matchedProduct) {
         setCartCount(prev => prev + 1);
+        setCartItems(prev => {
+          const existingItem = prev.find(item => item.name === matchedProduct.name);
+          if (existingItem) {
+            return prev.map(item =>
+              item.name === matchedProduct.name
+                ? { ...item, quantity: item.quantity + 1 }
+                : item
+            );
+          } else {
+            return [...prev, {
+              id: Date.now(),
+              name: matchedProduct.name,
+              price: matchedProduct.price,
+              quantity: 1
+            }];
+          }
+        });
         setCartMessage(`✅ Added "${matchedProduct.name}" to cart!`);
         
         // Clear the message after 3 seconds
@@ -562,6 +584,7 @@ const App = () => {
             <div className="flex items-center gap-6">
               <motion.button 
                 className="nav-button text-white hover:bg-[#0062BD] px-6 py-2.5 rounded-full flex items-center transition-colors"
+                onClick={() => setIsCartOpen(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => window.location.href = '/cart'}
@@ -690,6 +713,139 @@ const App = () => {
                     )}
                   </AnimatePresence>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Cart Modal */}
+        <AnimatePresence>
+          {isCartOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center"
+              onClick={() => setIsCartOpen(false)}
+            >
+              <motion.div
+                className="bg-white rounded-xl w-[90%] max-w-[500px] max-h-[80vh] overflow-hidden relative mx-auto"
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                      <ShoppingCartIcon className="h-6 w-6 mr-2 text-[#0071DC]" />
+                      Your Cart ({cartCount})
+                    </h2>
+                    <button 
+                      onClick={() => setIsCartOpen(false)}
+                      className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-200"
+                    >
+                      <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-6 max-h-[400px] overflow-y-auto">
+                  {cartItems.length === 0 ? (
+                    <div className="text-center py-8">
+                      <ShoppingCartIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 text-lg">Your cart is empty</p>
+                      <p className="text-gray-400 text-sm">Add some items to get started!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {cartItems.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-800">{item.name}</h3>
+                            <p className="text-[#0071DC] font-semibold">{item.price}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => {
+                                  setCartItems(prev => 
+                                    prev.map(cartItem =>
+                                      cartItem.id === item.id && cartItem.quantity > 1
+                                        ? { ...cartItem, quantity: cartItem.quantity - 1 }
+                                        : cartItem
+                                    )
+                                  );
+                                  if (item.quantity > 1) {
+                                    setCartCount(prev => prev - 1);
+                                  }
+                                }}
+                                className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                              >
+                                -
+                              </button>
+                              <span className="w-8 text-center font-medium">{item.quantity}</span>
+                              <button 
+                                onClick={() => {
+                                  setCartItems(prev => 
+                                    prev.map(cartItem =>
+                                      cartItem.id === item.id
+                                        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                                        : cartItem
+                                    )
+                                  );
+                                  setCartCount(prev => prev + 1);
+                                }}
+                                className="w-8 h-8 flex items-center justify-center bg-white border border-gray-300 rounded-full hover:bg-gray-100 transition-colors"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                setCartCount(prev => prev - item.quantity);
+                                setCartItems(prev => prev.filter(cartItem => cartItem.id !== item.id));
+                              }}
+                              className="text-red-500 hover:text-red-700 transition-colors p-1"
+                            >
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {cartItems.length > 0 && (
+                  <div className="p-6 border-t border-gray-200 bg-gray-50">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-semibold text-gray-800">Total:</span>
+                      <span className="text-xl font-bold text-[#0071DC]">
+                        ${cartItems.reduce((total, item) => {
+                          const price = parseFloat(item.price.replace('$', ''));
+                          return total + (price * item.quantity);
+                        }, 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full bg-[#0071DC] hover:bg-[#004F9A] text-white font-semibold py-3 px-6 rounded-full transition-colors duration-200"
+                    >
+                      Proceed to Checkout
+                    </motion.button>
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           )}
