@@ -218,6 +218,7 @@ const App = () => {
   const [error, setError] = useState(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [cartMessage, setCartMessage] = useState('');
   const {
     transcript,
     listening,
@@ -225,10 +226,58 @@ const App = () => {
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
 
+  // Dummy products list for matching voice commands
+  const dummyProducts = [
+    { name: "BBQ Grill Master Set", price: "$89.99" },
+    { name: "Patriotic Picnic Set", price: "$39.99" },
+    { name: "LED String Lights", price: "$14.99" },
+    { name: "Cooler Combo Pack", price: "$79.99" },
+    { name: "Patriotic Decorations", price: "$19.99" },
+    { name: "BBQ Essentials", price: "$24.99" },
+    { name: "Party Supplies", price: "$15.99" },
+    { name: "Fireworks", price: "$29.99" },
+    { name: "Outdoor Games", price: "$34.99" },
+    { name: "Patriotic Apparel", price: "$22.99" }
+  ];
+
+  // Function to handle "add to cart" voice commands
+  const handleAddToCartCommand = useCallback((transcript) => {
+    const addToCartPattern = /add to cart (.+)/i;
+    const match = transcript.match(addToCartPattern);
+    
+    if (match) {
+      const productName = match[1].trim().toLowerCase();
+      
+      // Find matching product
+      const matchedProduct = dummyProducts.find(product => 
+        product.name.toLowerCase().includes(productName) ||
+        productName.includes(product.name.toLowerCase().split(' ')[0].toLowerCase()) ||
+        productName.includes(product.name.toLowerCase().split(' ')[1]?.toLowerCase())
+      );
+      
+      if (matchedProduct) {
+        setCartCount(prev => prev + 1);
+        setCartMessage(`✅ Added "${matchedProduct.name}" to cart!`);
+        
+        // Clear the message after 3 seconds
+        setTimeout(() => setCartMessage(''), 3000);
+        
+        // Stop listening after successful add to cart
+        handleStopListening();
+        return true;
+      } else {
+        setCartMessage(`❌ Product "${productName}" not found. Try being more specific.`);
+        setTimeout(() => setCartMessage(''), 3000);
+        return false;
+      }
+    }
+    return false;
+  }, [dummyProducts]);
   const handleVoiceSearch = useCallback(async () => {
     try {
       if (!isListening) {
         setError(null);
+        setCartMessage('');
         setIsLoading(true);
         await SpeechRecognition.startListening({ continuous: true });
         setIsListening(true);
@@ -252,6 +301,11 @@ const App = () => {
   // Effect for handling voice search results
   useEffect(() => {
     if (transcript) {
+      // First check if it's an "add to cart" command
+      const wasAddToCartCommand = handleAddToCartCommand(transcript);
+      
+      // If it wasn't an add to cart command, proceed with search
+      if (!wasAddToCartCommand) {
       // Simulate API call with loading state
       setIsLoading(true);
       setTimeout(() => {
@@ -290,8 +344,9 @@ const App = () => {
         setSearchResults(mockResults);
         setIsLoading(false);
       }, 1000);
+      }
     }
-  }, [transcript]);
+  }, [transcript, handleAddToCartCommand]);
 
   const slides = [
     {
@@ -612,8 +667,26 @@ const App = () => {
                     animate={{ opacity: 1 }}
                     className="text-gray-500 text-center"
                   >
-                    {transcript || "Say something like 'Show me 4th of July decorations'"}
+                    {transcript || "Say 'Show me 4th of July decorations' or 'Add to cart BBQ grill'"}
                   </motion.p>
+                  
+                  {/* Cart message display */}
+                  <AnimatePresence>
+                    {cartMessage && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className={`mt-4 p-3 rounded-lg text-center font-medium ${
+                          cartMessage.includes('✅') 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {cartMessage}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             </motion.div>
